@@ -1,70 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Lacrosse Field</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <script type="module">
-        import * as THREE from 'https://cdn.skypack.dev/three@0.140.0';
-        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.140.0/examples/js/controls/OrbitControls.js';
+<script type="module">
+    import * as THREE from 'https://cdn.skypack.dev/three@0.140.0';
+    import { OrbitControls } from 'https://cdn.skypack.dev/three@0.140.0/examples/js/controls/OrbitControls.js';  // This is the named export
 
-        // Initialize Scene, Camera, and Renderer
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Initialize Scene, Camera, and Renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create Field (50x30 meters)
+    const fieldGeometry = new THREE.PlaneGeometry(50, 30);
+    const fieldMaterial = new THREE.MeshBasicMaterial({ color: 0x008000, side: THREE.DoubleSide });
+    const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
+    field.rotation.x = -Math.PI / 2; // Rotate to lay flat
+    scene.add(field);
+
+    // Create Goals
+    function createGoal(x, z) {
+        const goalGeometry = new THREE.BoxGeometry(6, 6, 1);
+        const goalMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+        const goal = new THREE.Mesh(goalGeometry, goalMaterial);
+        goal.position.set(x, 3, z);
+        scene.add(goal);
+    }
+    createGoal(0, -14);  // Goal 1
+    createGoal(0, 14);   // Goal 2
+
+    // Position Camera Behind Goal
+    camera.position.set(0, 10, 25);
+    camera.lookAt(0, 0, 0);
+
+    // Enable Mouse Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.5;
+    controls.minDistance = 10;
+    controls.maxDistance = 60;
+
+    // Render Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle Window Resizing
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Create Field (50x30 meters)
-        const fieldGeometry = new THREE.PlaneGeometry(50, 30);
-        const fieldMaterial = new THREE.MeshBasicMaterial({ color: 0x008000, side: THREE.DoubleSide });
-        const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
-        field.rotation.x = -Math.PI / 2; // Rotate to lay flat
-        scene.add(field);
-
-        // Create Goals
-        function createGoal(x, z) {
-            const goalGeometry = new THREE.BoxGeometry(6, 6, 1);
-            const goalMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
-            const goal = new THREE.Mesh(goalGeometry, goalMaterial);
-            goal.position.set(x, 3, z);
-            scene.add(goal);
-        }
-        createGoal(0, -14);  // Goal 1
-        createGoal(0, 14);   // Goal 2
-
-        // Position Camera Behind Goal
-        camera.position.set(0, 10, 25);
-        camera.lookAt(0, 0, 0);
-
-        // Enable Mouse Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.rotateSpeed = 0.5;
-        controls.minDistance = 10;
-        controls.maxDistance = 60;
-
-        // Render Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Handle Window Resizing
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
+    });
+</script>
